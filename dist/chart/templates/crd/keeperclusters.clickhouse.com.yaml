@@ -769,7 +769,7 @@ spec:
                                         default: true
                                         description: |-
                                             Enabled controls whether the operator creates PodDisruptionBudgets.
-                                            Defaults to true when unset. Set to false to disable PDB creation (e.g. for dev environments).
+                                            Defaults to true when unset. Set it to false to disable PDB creation (e.g. for development environments).
                                         type: boolean
                                     maxUnavailable:
                                         anyOf:
