@@ -148,6 +148,15 @@ func templateClusterSecrets(cr *v1.ClickHouseCluster, secret *corev1.Secret) boo
 	return changed
 }
 
+// restartRequiredConfigKeys contains config file keys that require a pod restart when changed.
+// config.yaml (base), 00-network.yaml, 99-extra-config.yaml — path, logger, ports, keeper, TLS require restart.
+// users.yaml, 99-extra-users-config.yaml, 00-logs-tables.yaml — can be reloaded without restart.
+var restartRequiredConfigKeys = map[string]struct{}{
+	controllerutil.PathToName(path.Join(ConfigPath, ConfigFileName)):                 {},
+	controllerutil.PathToName(path.Join(ConfigPath, ConfigDPath, "00-network.yaml")): {},
+	ExtraConfigFileName: {},
+}
+
 func getConfigurationRevision(r *clickhouseReconciler) (string, error) {
 	config, err := generateConfigForSingleReplica(r, v1.ClickHouseReplicaID{})
 	if err != nil {
@@ -157,6 +166,27 @@ func getConfigurationRevision(r *clickhouseReconciler) (string, error) {
 	hash, err := controllerutil.DeepHashObject(config)
 	if err != nil {
 		return "", fmt.Errorf("hash template configuration: %w", err)
+	}
+
+	return hash, nil
+}
+
+func getRestartRequiredConfigRevision(r *clickhouseReconciler) (string, error) {
+	config, err := generateConfigForSingleReplica(r, v1.ClickHouseReplicaID{})
+	if err != nil {
+		return "", fmt.Errorf("generate template configuration: %w", err)
+	}
+
+	restartRequired := make(map[string]string)
+	for k, v := range config {
+		if _, ok := restartRequiredConfigKeys[k]; ok {
+			restartRequired[k] = v
+		}
+	}
+
+	hash, err := controllerutil.DeepHashObject(restartRequired)
+	if err != nil {
+		return "", fmt.Errorf("hash restart-required configuration: %w", err)
 	}
 
 	return hash, nil
