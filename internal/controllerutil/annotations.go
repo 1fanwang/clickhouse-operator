@@ -56,6 +56,7 @@ func GetRestartRequiredConfigHashFromObject(found client.Object) string {
 	if annotations == nil || annotations[AnnotationRestartRequiredConfigHash] == "" {
 		return ""
 	}
+
 	return annotations[AnnotationRestartRequiredConfigHash]
 }
 

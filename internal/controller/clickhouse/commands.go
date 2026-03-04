@@ -102,7 +102,7 @@ func (cmd *commander) Version(ctx context.Context, id v1.ClickHouseReplicaID) (s
 	return version, nil
 }
 
-// ReloadConfig executes SYSTEM RELOAD CONFIG
+// ReloadConfig executes SYSTEM RELOAD CONFIG.
 func (cmd *commander) ReloadConfig(ctx context.Context, id v1.ClickHouseReplicaID) error {
 	conn, err := cmd.getConn(id)
 	if err != nil {
@@ -116,7 +116,7 @@ func (cmd *commander) ReloadConfig(ctx context.Context, id v1.ClickHouseReplicaI
 	return nil
 }
 
-// ReloadUsers executes SYSTEM RELOAD USERS
+// ReloadUsers executes SYSTEM RELOAD USERS.
 func (cmd *commander) ReloadUsers(ctx context.Context, id v1.ClickHouseReplicaID) error {
 	conn, err := cmd.getConn(id)
 	if err != nil {

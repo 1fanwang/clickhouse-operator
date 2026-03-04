@@ -141,10 +141,13 @@ var _ = Describe("ClickHouse controller", Label("clickhouse"), func() {
 			ClickHouseRWChecks(ctx, &cr, &checks)
 
 			By("recording pod UIDs before config change")
+
 			var podsBefore corev1.PodList
+
 			Expect(k8sClient.List(ctx, &podsBefore, client.InNamespace(testNamespace),
 				client.MatchingLabels{controllerutil.LabelAppKey: cr.SpecificName()})).To(Succeed())
 			Expect(podsBefore.Items).NotTo(BeEmpty())
+
 			uidByPodName := make(map[string]types.UID)
 			for _, p := range podsBefore.Items {
 				uidByPodName[p.Name] = p.UID
@@ -160,19 +163,25 @@ var _ = Describe("ClickHouse controller", Label("clickhouse"), func() {
 			By("waiting for configuration to sync")
 			EventuallyWithOffset(1, func() bool {
 				var cluster v1.ClickHouseCluster
+
 				ExpectWithOffset(1, k8sClient.Get(ctx, cr.NamespacedName(), &cluster)).To(Succeed())
+
 				for _, cond := range cluster.Status.Conditions {
 					if cond.Type == string(v1.ConditionTypeConfigurationInSync) && cond.Status == metav1.ConditionTrue {
 						return true
 					}
 				}
+
 				return false
 			}, 2*time.Minute).Should(BeTrue())
 
 			By("verifying pods were not restarted (same UIDs)")
+
 			var podsAfter corev1.PodList
+
 			Expect(k8sClient.List(ctx, &podsAfter, client.InNamespace(testNamespace),
 				client.MatchingLabels{controllerutil.LabelAppKey: cr.SpecificName()})).To(Succeed())
+
 			for _, p := range podsAfter.Items {
 				Expect(p.UID).To(Equal(uidByPodName[p.Name]),
 					"pod %s was restarted (UID changed)", p.Name)
