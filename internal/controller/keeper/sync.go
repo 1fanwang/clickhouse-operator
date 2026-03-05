@@ -647,7 +647,6 @@ func (r *keeperReconciler) reconcileConditions(ctx context.Context, log ctrlutil
 	if err := r.UpdateUpgradeCondition(ctx, log, r.versionProbe, r.Cluster.Spec.UpgradeChannel); err != nil {
 		return nil, fmt.Errorf("update VersionUpgraded condition: %w", err)
 	}
-
 	exists := len(r.ReplicaState)
 	expected := int(r.Cluster.Replicas())
 
